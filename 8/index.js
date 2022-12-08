@@ -98,12 +98,6 @@ const input = `20122122231023121012124244041311330024000441445254125545142343330
 121002102321231001201142232101443245123213423322413515533435542224131011043014003402130011211231220
 002220132213130200100332200140301325451123154323515145222525421135230113344411313343203012321310011`
 
-// const input = `30373
-// 25512
-// 65332
-// 33549
-// 35390`
-
 const M = input.split('\n').map(l => l.split('').map(c => +c));
 const H = M.length;
 const W = M[0].length;
@@ -169,3 +163,43 @@ for (let x = 1; x < W - 1; x++) {
 }
 
 console.log(C);
+
+let V = 0;
+
+for (let x = 1; x < W - 1; x++) {
+  for (let y = 1; y < H - 1; y++) {
+    const v = visibility(x, y, 't') * visibility(x, y, 'r') * visibility(x, y, 'b') * visibility(x, y, 'l');
+    V = max(V, v);
+  }
+}
+
+function visibility(x, y, d) {
+  switch(d) {
+  case 't':
+    if (y === 1) return 1;
+    for (let v = 1; y - v >= 1; v++) {
+      if (M[y - v][x] >= M[y][x]) return v;
+    }
+    return y;
+  case 'r':
+    if (x === W - 2) return 1;
+    for (let v = 1; x + v <= W - 2; v++) {
+      if (M[y][x + v] >= M[y][x]) return v;
+    }
+    return W - x - 1;
+  case 'b':
+    if (y === H - 2) return 1;
+    for (let v = 1; y + v <= H - 2; v++) {
+      if (M[y + v][x] >= M[y][x]) return v;
+    }
+    return H - y - 1;
+  case 'l':
+    if (x === 1) return 1;
+    for (let v = 1; x - v >= 1; v++) {
+      if (M[y][x - v] >= M[y][x]) return v;
+    }
+    return x;
+  }
+}
+
+console.log(V);
