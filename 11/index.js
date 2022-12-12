@@ -1,27 +1,3 @@
-const testInput = `79, 98
-old * 19
-23
-2
-3
-
-54, 65, 75, 74
-old + 6
-19
-2
-0
-
-79, 60, 97
-old * old
-13
-1
-3
-
-74
-old + 3
-17
-0
-1`
-
 const input = `78, 53, 89, 51, 52, 59, 58, 85
 old * 3
 5
@@ -71,23 +47,25 @@ old * old
 5`
 
 function allez(R, z) {
-  const M = testInput
+  const M = input
     .split('\n\n')
     .map(a => {
       const [b, c, d, e, f] = a.split('\n')
-      const i = b.split(', ').map(z => BigInt(z))
+      const i = b.split(', ').map(z => +z)
       const [o1, op, o2] = c.split(' ')
       return {
         i,
-        o1: o1 === 'old' ? undefined : BigInt(o1),
+        o1: o1 === 'old' ? undefined : +o1,
         op,
-        o2: o2 === 'old' ? undefined : BigInt(o2),
-        d: BigInt(d),
+        o2: o2 === 'old' ? undefined : +o2,
+        d: +d,
         t: +e,
         f: +f,
         x: 0,
       }
     })
+  
+  const D = M.reduce((a, m) => a * m.d, 1)
 
   for (let r = 0; r < R; r++) {
     for (const m of M) {
@@ -102,8 +80,8 @@ function allez(R, z) {
           i = o1 * o2
           break
         }
-        if (z) i = i / 3n
-        M[i % m.d === 0n ? m.t : m.f].i.push(i)
+        if (z) i = Math.floor(i / 3)
+        M[i % m.d === 0 ? m.t : m.f].i.push(z ? i : (i % D))
         m.x++
       }
     }
