@@ -50,15 +50,23 @@ const testInput = `2,18 -2,15
 const y = 2000000
 const testY = 10
 
-const R = new Set()
-
-input
-  .split('\n')
-  .map(l => l.split(' ').map(s => s.split(',').map(c => +c)))
-  .map(([s, b]) => [s, b,  Math.abs(b[0] - s[0]) + Math.abs(b[1] - s[1]), Math.abs(y - s[1])])
-  .filter(([, , d, D]) => d >= D)
-  .forEach(([[sx], , d, D]) => {
-    for (let x = sx - d + D; x <= sx + d - D; x++) R.add(x)
-  })
-
-console.log(R.size - 1)
+console.log(
+  input
+    .split('\n')
+    .map(l => l.split(' ').map(s => s.split(',').map(c => +c)))
+    .map(([s, b]) => [s, b,  Math.abs(b[0] - s[0]) + Math.abs(b[1] - s[1]), Math.abs(y - s[1])])
+    .filter(([, , d, D]) => d >= D)
+    .map(([[sx], , d, D]) => [sx - d + D, sx + d - D])
+    .sort(([a], [b]) => a - b)
+    .reduce(
+      (a, b) => {
+        if (a.length === 0) return [b]
+        const l = a.at(-1)
+        if (b[0] > l[1]) a.push(b)
+        else l[1] = Math.max(l[1], b[1])
+        return a
+      },
+      [],
+    ).map(([l, r]) => r - l)
+    .reduce((a, b) => a + b)
+)
