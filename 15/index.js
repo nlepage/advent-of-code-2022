@@ -32,23 +32,7 @@ const input = `1555825,18926 1498426,-85030
 1958708,2370822 1749091,2000000
 3039958,3574483 3074353,3516891`
 
-const testInput = `2,18 -2,15
-9,16 10,16
-13,2 15,3
-12,14 10,16
-10,20 10,16
-14,17 10,16
-8,7 2,10
-2,0 2,10
-0,11 2,10
-20,14 25,17
-17,20 21,22
-16,7 15,3
-14,3 15,3
-20,1 15,3`
-
 const y = 2000000
-const testY = 10
 
 console.log(
   input
@@ -70,3 +54,33 @@ console.log(
     ).map(([l, r]) => r - l)
     .reduce((a, b) => a + b)
 )
+
+const z = input
+  .split('\n')
+  .map(l => l.split(' ').map(s => s.split(',').map(c => +c)))
+  .map(([s, b]) => [s, b,  Math.abs(b[0] - s[0]) + Math.abs(b[1] - s[1])])
+
+const M = 4000000
+
+for (let y = 0; y <= M; y++) {
+  const r = z
+    .map(([s, b, d]) => [s, b, d, Math.abs(y - s[1])])
+    .filter(([, , d, D]) => d >= D)
+    .map(([[sx], , d, D]) => [sx - d + D, sx + d - D])
+    .sort(([a], [b]) => a - b)
+    .reduce(
+      (a, b) => {
+        if (a.length === 0) return [b]
+        const l = a.at(-1)
+        if (b[0] > l[1]) a.push(b)
+        else l[1] = Math.max(l[1], b[1])
+        return a
+      },
+      [],
+    )
+  
+  if (r.length === 1) continue
+
+  console.log((r[0][1] + 1) * 4000000 + y)
+  break
+}
