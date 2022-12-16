@@ -65,11 +65,9 @@ JJ,21,II`
 const z = input.split('\n').map(l => l.split(',')).map(([v, p, ...t]) => [v, +p, t])
 
 const P = new Map(z.filter(([, p]) => p))
-// console.log(P)
 const T = new Map(z.map(([v, , t]) => [v, t]))
 
 const E = new Map(Array.from(P.keys(), v => [v, fsp(v)]))
-// console.log(E)
 
 function fsp(sv) {
   const R = []
@@ -86,15 +84,37 @@ function fsp(sv) {
   return R
 }
 
-const Q = fsp('AA').map(([v, c]) => [v, 29 - c, (29 - c) * P.get(v), [v]])
+let Q = fsp('AA').map(([v, c]) => [v, 29 - c, (29 - c) * P.get(v), [v]])
 let B = 0
 
 while (Q.length) {
   const [v, m, p, V] = Q.shift()
-  const e = E.get(v)
-  const n = e.filter(([v]) => !V.includes(v)).map(([v, c]) => [v, m - c - 1]).filter(([, m]) => m > 0)
+  const n = E.get(v).filter(([v]) => !V.includes(v)).map(([v, c]) => [v, m - c - 1]).filter(([, m]) => m > 0)
   if (n.length === 0) B = Math.max(B, p)
   Q.push(...n.map(([v, m]) => [v, m, p + m * P.get(v), [...V, v]]))
 }
 
 console.log(B)
+
+Q = cross(fsp('AA')).map(([[v1, c1], [v2, c2]]) => [v1, 25 - c1, v2, 25 - c2, (25 - c1) * P.get(v1) + (25 - c2) * P.get(v2), [v1, v2]])
+B = 0
+
+while (Q.length) {
+  const [v1, m1, v2, m2, p, V] = Q.shift()
+  let n1 = E.get(v1).filter(([v]) => !V.includes(v)).map(([v, c]) => [v, m1 - c - 1]).filter(([, m]) => m > 0)
+  let n2 = !v2 ? [] : E.get(v2).filter(([v]) => !V.includes(v)).map(([v, c]) => [v, m2 - c - 1]).filter(([, m]) => m > 0)
+  let n = n1.flatMap(a => n2.filter(b => a[0] !== b[0]).map(b => [a, b]))
+  if (n.length === 0) n = [...n1.map(a => [a]), ...n2.map(a => [a])]  
+  if (n.length === 0) B = Math.max(B, p)
+  Q.push(...n.map(([[v1, m1], [v2, m2] = []]) => {
+    if (!v2) return [v1, m1, undefined, undefined, p + m1 * P.get(v1), [...V, v1]]
+    return [v1, m1, v2, m2, p + m1 * P.get(v1) + m2 * P.get(v2), [...V, v1, v2]]
+  }))
+  if (Q.length % 100 === 0) console.log(Q.length)
+}
+
+console.log(B)
+
+function cross(l) {
+  return l.slice(0, -1).flatMap((a, i) => l.slice(i + 1).map(b => [a, b]))
+}
