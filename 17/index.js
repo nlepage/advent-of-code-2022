@@ -27,7 +27,9 @@ const R = [
   ]
 ]
 
-const M = Array.from({ length: 5000 }).fill(0b100000001)
+const MS = 1000000000000
+
+const M = Array.from({ length: 10000 }).fill(0b100000001)
 M[0] = 0b111111111
 
 let S = 0
@@ -36,10 +38,13 @@ let ri = 0
 let r = R[0]
 let x = 3
 let y = H + 4
+let lp = 0
+const P = new Map()
+let HH = 0
 
 top: while (true) {
-  for (const c of input) {
-    const nx = x + (c === '<' ? -1 : 1)
+  for (let ci = 0; ci < input.length; ci++) {
+    const nx = x + (input[ci] === '<' ? -1 : 1)
     if (r.every((n, i) => ((n >> nx) & M[y + i]) === 0)) x = nx
     if (r.every((n, i) => ((n >> x) & M[y - 1 + i]) === 0)) y--
     else {
@@ -47,25 +52,27 @@ top: while (true) {
         M[y + i] |= n >> x
       })
       H = M.indexOf(0b100000001, H) - 1
-      if (++S === 2022) break top
+      if (++S === MS) break top
       r = R[(++ri % R.length)]
       x = 3
       y = H + 4
-      // debug()
+      if (HH) continue
+      const p = M.indexOf(0b111111111, lp + 1)
+      if (p !== -1) {
+        lp = p
+        if (P.has(ci)) {
+          const [fp, fS] = P.get(ci)
+          const dp = p - fp // diff hauteur plancher
+          const dS = S - fS // diff nb rochers
+          const f = Math.floor((MS - S) / dS) // facteur
+          S += f * dS
+          HH = f * dp
+        } else {
+          P.set(ci, [p, S])
+        }
+      }
     }
   }
 }
 
-console.log(H)
-
-function debug() {
-  console.log(M.slice(0, H + 5).reverse().map(n => n.toString(2).replaceAll('0', ' ')).join('\n'))
-  console.log('')
-}
-
-// 4 #       #
-// 3 #       #
-// 2 #       #
-// 1 #       #
-// 0 #########
-//   012345678
+console.log(H + HH)
