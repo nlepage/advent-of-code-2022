@@ -2741,40 +2741,53 @@ const input = `13,6,3
 14,9,5
 14,14,2`
 
-const testInput = `2,2,2
-1,2,2
-3,2,2
-2,1,2
-2,3,2
-2,2,1
-2,2,3
-2,2,4
-2,2,6
-1,2,5
-3,2,5
-2,1,5
-2,3,5`
+const D = input.split('\n').map(l => l.split(',').map(c => +c + 1))
 
-const D = input.split('\n').map(l => l.split(',').map(c => +c))
+const X = Math.max(...D.map(([x]) => x)) + 1
+const Y = Math.max(...D.map(([, y]) => y)) + 1
+const Z = Math.max(...D.map(([, , z]) => z)) + 1
 
 const M = Array.from(
-  { length: Math.max(...D.map(([x]) => x)) + 1 },
+  { length: X + 1 },
   () => Array.from(
-    { length: Math.max(...D.map(([, y]) => y)) + 1 },
-    () => Array.from({ length: Math.max(...D.map(([, , z]) => z)) + 1 }),
+    { length: Y + 1 },
+    () => Array.from({ length: Z + 1 }),
   ),
 )
 
 let H = 0
 
 D.forEach(([x, y, z]) => {
-  if (M[x-1]?.[y]?.[z]) H++
-  if (M[x+1]?.[y]?.[z]) H++
-  if (M[x]?.[y-1]?.[z]) H++
-  if (M[x]?.[y+1]?.[z]) H++
-  if (M[x]?.[y]?.[z-1]) H++
-  if (M[x]?.[y]?.[z+1]) H++
-  M[x][y][z] = true
+  if (M[x-1][y][z]) H++
+  if (M[x+1][y][z]) H++
+  if (M[x][y-1][z]) H++
+  if (M[x][y+1][z]) H++
+  if (M[x][y][z-1]) H++
+  if (M[x][y][z+1]) H++
+  M[x][y][z] = 1
 })
 
 console.log(D.length * 6 - H * 2)
+
+const Q = [[0, 0, 0]]
+let S = 0
+
+while (Q.length) {
+  const [x, y, z] = Q.shift()
+  if (M[x][y][z]) continue
+  if (M[x-1]?.[y]?.[z] === 1) S++
+  if (M[x+1]?.[y]?.[z] === 1) S++
+  if (M[x]?.[y-1]?.[z] === 1) S++
+  if (M[x]?.[y+1]?.[z] === 1) S++
+  if (M[x]?.[y]?.[z-1] === 1) S++
+  if (M[x]?.[y]?.[z+1] === 1) S++
+  M[x][y][z] = 2
+  if (x > 0) Q.push([x-1, y, z])
+  if (x < X) Q.push([x+1, y, z])
+  if (y > 0) Q.push([x, y-1, z])
+  if (y < Y) Q.push([x, y+1, z])
+  if (z > 0) Q.push([x, y, z-1])
+  if (z < Z) Q.push([x, y, z+1])
+}
+
+console.log(S)
